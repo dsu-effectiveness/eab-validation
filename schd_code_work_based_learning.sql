@@ -1,30 +1,71 @@
 /*
- Waiting for EAB to add schedule type:
- Email sent 5/21/2020
- •	Issue name: Schedule Type  missing  from Section Schedule
-•	Issue description: I don’t see ssbsect_schd_code or the section type in section_schedule.  Could we get this added from banner to the section_schedule table?  The banner table names are: ssbsect_schd_code & stvschd is the validation table.
-•	Urgency: not urgent
-•	Affected Quad entity: Section Schedule
-•	Affected Quad field: schedule_type
+Need to add in_catalog_ind.  This comes from scbcrky_term_code_end = '999999'
  */
 
  -- Main Query
-select
-    ss.subject_id as subject_code,
+ select distinct
+    ss.subject_id,
+    c.subject_id,
+    ss.course_number,
+    c.course_number,
+    c.course_title,
+    ss.section_format_type_code,
+    ss.section_format_type_desc,
+    ss.subject_id || ss.course_number,
+     c.course_status_code
+from student_section ss
+inner join term t on t.term_id = ss.term_id
+left join course c on c.subject_id  = ss.subject_id and ss.course_number = c.course_number
+where (ss.section_format_type_code in ('CLN', 'PRA', 'SUP', 'INT'))
+order by 1, 2;
+
+select *
+from course
+where subject_id = 'RADT';
+
+select distinct department_id, subject_id
+from course
+order by 1;
+where college_id = 'HS';
+and department_id = 'RADT';
+
+select *
+from section;
+
+-- Show Andrea Query
+select distinct
+    ss.subject_id,
+    c.subject_id,
     ss.course_number,
     c.course_title,
-    c.course_number,
-    ss.course_number
+    ss.section_format_type_code,
+    ss.section_format_type_desc,
+    c.max_term_id_effective,
+    c.subject_id || ss.course_number,
+    c.course_id
 from student_section ss
-left join course c on c.subject_id || ss.course_number = c.course_id
-where ss.subject_id = 'COOP'
+left join term t on t.term_id = ss.term_id
+inner join course c on c.subject_id  = ss.subject_id and ss.course_number = c.course_number
+where
+    c.course_status_code = 'A'
+    and (ss.section_format_type_code in ('CLN', 'PRA', 'SUP', 'INT') or ss.subject_id = 'COOP')
+    and ss.subject_id = 'ACCT' and ss.course_number in ('3440', '3500')
+    and max_term_id_effective = '201940'
 order by ss.subject_id, ss.course_number;
 --
 -- select *
 -- from section;
---
--- select *
--- from course;
+
+select
+    max_term_id_effective,
+    course_number,
+    subject_id,
+    course_desc,
+    course_status_code
+from course
+where course_status_code <> 'A'
+order by 1,3,2;
+
 --
 -- select *
 -- from section_schedule;
@@ -34,14 +75,38 @@ order by ss.subject_id, ss.course_number;
 -- from course
 -- where course_number = '0100';
 --
--- select distinct
---     course_number,
---     COUNT(*)
--- from course
--- group by course_number
--- order by 1;
+select distinct
+    course_number,
+    subject_id,
+    COUNT(*)
+from course
+group by course_number, subject_id
+order by 1;
 --
 -- select
 --     course_number,
 --     subject_id
 -- from student_section;
+
+select
+    section_format_type_code,
+    section_format_type_desc
+from section
+where section_format_type_code IN ('CLN', 'PRA', 'SUP', 'INT');
+
+select *
+from section_schedule;
+
+select *
+from student_section;
+
+select *
+from term;
+
+select
+    course_number, subject_id,
+    COUNT(*)
+from course
+group by course_number, subject_id
+HAVING count(*) > 1
+order by 1;
