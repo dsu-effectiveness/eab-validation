@@ -19,19 +19,31 @@ ORDER BY 1;
    The course below should be inactive and is not a current course
 */
 
-SELECT DISTINCT *
+SELECT DISTINCT subject_code, course_number
 FROM course
-WHERE department_id = 'MUSC' AND course_number = '1000';
+WHERE is_current_course = TRUE
+AND subject_code = 'BIOL' AND course_number = '1625A'
+ORDER BY 1, 2;
+
+SELECT course_id
+FROM student_term_level;
+
+SELECT *
+FROM student_section a
+LEFT JOIN course b on b.course_id = a.course_id;
 
 /* Current Course from Student Section */
 SELECT DISTINCT
 a.course_reference_number,
 a.subject_id,
-a.course_number
+a.course_number,
+c.is_current_course
 FROM student_section a
 LEFT JOIN section b ON a.section_id = b.section_id
+LEFT JOIN course c on c.course_id = b.course_id
 WHERE a.term_id = '202030'
 ORDER BY course_reference_number, subject_id, course_reference_number;
+
 
 
 /* This table validates with Summer 202030 to courses_current
