@@ -15,14 +15,16 @@ SELECT DISTINCT
 AND is_registered = 'Y'
 ORDER BY 1;
 
-SELECT registration_status_code, level_id
+SELECT registration_status_code level_id, term_id
 FROM student_term_level a
-WHERE term_id = '202030'
-AND sis_system_id = '26691';
+WHERE  sis_system_id = '102344';
 
-SELECT is_registered, registration_status_code, course_level_id
-FROM student_section a
-WHERE sis_system_id = '26691' and term_id = '202030';
+/* CE Course Discussion.  Need to determine how and when to flag these as registered */
+SELECT b.section_title, b.subject_desc, b.subject_id, b.course_reference_number, b.actual_enrollment, b.term_id
+FROM section b
+WHERE subject_id LIKE 'CE%'
+ORDER BY term_id DESC;
+
 
 SELECT DISTINCT
        sis_system_id AS pidm,
