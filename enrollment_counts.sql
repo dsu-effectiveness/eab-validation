@@ -103,4 +103,62 @@ from student_section
 where sis_system_id = '26691'
 and term_id = '202030';
 
+/* EAB Validation Query includes Advising Metrics*/
+SELECT
+    level_id
+  , level_desc
+  , term_id
+  , term_desc
+  , COUNT(DISTINCT student_id)                                          AS registered_students
+  , COUNT(DISTINCT student_id)
+    FILTER ( WHERE primary_advisor_employee_id IS NOT NULL)             AS registered_students_with_advisor
+  , COUNT(DISTINCT primary_advisor_employee_id)
+    FILTER ( WHERE primary_advisor_employee_id IS NOT NULL)             AS advisors
+ FROM student_term_level
+ WHERE is_primary_level
+  AND (is_registered OR is_registered_other_level)
+  AND student_term_level.term_id IN (
+    SELECT
+        term_id
+    FROM term
+    WHERE term_start_date BETWEEN current_date - INTERVAL '2 year' AND current_date
+                                    )
+ GROUP BY
+    1, 2, 3, 4
+ ORDER BY
+    1 DESC, 3 DESC
+
+/* EAB Validation Query: Demographics  */
+
+SELECT
+    student.primary_level_id
+  , student.gender_code
+  , COUNT(DISTINCT student.student_id)                                             AS total_current_registered_students
+  , COUNT(student.student_id)
+    FILTER ( WHERE student.is_american_indian_alaskan )                            AS american_indian_alaskan_student_count
+  , COUNT(student.student_id) FILTER ( WHERE student.is_asian )                    AS asian_student_count
+  , COUNT(student.student_id) FILTER ( WHERE student.is_black )                    AS black_student_count
+  , COUNT(student.student_id)
+    FILTER ( WHERE student.is_hawaiian_pacific_islander )                          AS hawaiian_pacific_islander_student_count
+  , COUNT(student.student_id) FILTER ( WHERE student.is_white )                    AS white_student_count
+  , COUNT(student.student_id) FILTER ( WHERE student.is_multi_racial )             AS multi_racial_student_count
+  , COUNT(student.student_id) FILTER ( WHERE student.is_hispanic_latino_ethnicity ) AS hispanic_student_count
+  , COUNT(student.student_id) FILTER ( WHERE student.is_first_generation)          AS first_generation_student_count
+  , COUNT(student.student_id) FILTER ( WHERE student.is_veteran )                  AS veteran_student_count
+  , AVG(number_of_race_entries)                                                    AS average_number_of_race_detail_entries
+ FROM person           AS person
+    INNER JOIN student AS student
+               ON person.student_id = student.student_id
+    LEFT JOIN (
+                   SELECT
+                       person_id
+                     , COUNT(DISTINCT race_code) AS number_of_race_entries
+                   FROM person__race_detail
+                   GROUP BY person_id
+               )      AS race_count USING (person_id)
+ WHERE student.is_registered
+ GROUP BY
+    student.primary_level_id
+  , student.gender_code
+
 
