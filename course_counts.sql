@@ -1,16 +1,48 @@
-/*  Validated student_section with student_course
-    Still seeing issues with is_registered.
-    There is a ticket out there on this
- */
-SELECT DISTINCT
-       sis_system_id AS pidm,
-       is_registered,
-       term_id,
-       a.*
-  FROM student_section a
- WHERE term_id = '202030'
-   AND is_registered = 'Y'
+/* Courses */
+SELECT COUNT(course_reference_number), term_id
+FROM section
+GROUP BY term_id
+ORDER BY term_id DESC;
+
+/* Enrollment by CRN by Term */
+SELECT COUNT(course_reference_number), SUM(a.actual_enrollment), term_id
+FROM section a
+GROUP BY term_id
+ORDER BY term_id DESC;
+
+
+
+
+SELECT course_reference_number, actual_enrollment, enrollment_census
+FROM section
+WHERE term_id = '202030'
+AND course_reference_number = '30231'
 ORDER BY 1;
+
+
+SELECT course_reference_number, actual_enrollment, enrollment_census
+FROM section
+WHERE term_id = '202030'
+AND course_reference_number = '30016'
+ORDER BY 1;
+
+--30231 30016
+
+SELECT DISTINCT sis_system_id, is_enrolled, is_registered
+FROM student_section
+WHERE term_id = '202030' AND course_reference_number = '30016' AND is_enrolled IS TRUE;
+
+SELECT a.is_enrolled, a.is_registered, a.registration_status_desc, a.course_reference_number, a.*
+FROM student_section a
+WHERE term_id = '202030'
+AND sis_system_id = '130947';
+
+SELECT
+       COUNT(course_id),
+       first_effective_term_id
+FROM course
+GROUP BY first_effective_term_id
+ORDER BY first_effective_term_id DESC;
 
 /* Course Table
    Current Course Ind
